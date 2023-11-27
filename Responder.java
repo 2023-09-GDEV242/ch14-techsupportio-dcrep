@@ -14,8 +14,9 @@ import java.util.*;
  * in the HashMap, the corresponding response is returned. If none of the input
  * words is recognized, one of the default responses is randomly chosen.
  * 
- * @author David J. Barnes and Michael Kölling.
- * @version 2016.02.29
+ * @author Daniel Corritore
+ *         modified from David J. Barnes and Michael Kölling.
+ * @version 2023.11.26
  */
 public class Responder
 {
@@ -29,8 +30,12 @@ public class Responder
 
     /**
      * Construct a Responder
+     * 
+     * @throws IOException If there is an I/O error during file reading
+     * of responseMap
      */
     public Responder()
+    throws IOException
     {
         responseMap = new HashMap<>();
         defaultResponses = new ArrayList<>();
@@ -64,55 +69,87 @@ public class Responder
     /**
      * Enter all the known keywords and their associated responses
      * into our response map.
+     * 
+     * @throws IOException If there is an I/O error during file reading
      */
     private void fillResponseMap()
+    throws IOException
     {
-        responseMap.put("crash", 
-                        "Well, it never crashes on our system. It must have something\n" +
-                        "to do with your system. Tell me more about your configuration.");
-        responseMap.put("crashes", 
-                        "Well, it never crashes on our system. It must have something\n" +
-                        "to do with your system. Tell me more about your configuration.");
-        responseMap.put("slow", 
-                        "I think this has to do with your hardware. Upgrading your processor\n" +
-                        "should solve all performance problems. Have you got a problem with\n" +
-                        "our software?");
-        responseMap.put("performance", 
-                        "Performance was quite adequate in all our tests. Are you running\n" +
-                        "any other processes in the background?");
-        responseMap.put("bug", 
-                        "Well, you know, all software has some bugs. But our software engineers\n" +
-                        "are working very hard to fix them. Can you describe the problem a bit\n" +
-                        "further?");
-        responseMap.put("buggy", 
-                        "Well, you know, all software has some bugs. But our software engineers\n" +
-                        "are working very hard to fix them. Can you describe the problem a bit\n" +
-                        "further?");
-        responseMap.put("windows", 
-                        "This is a known bug to do with the Windows operating system. Please\n" +
-                        "report it to Microsoft. There is nothing we can do about this.");
-        responseMap.put("macintosh", 
-                        "This is a known bug to do with the Mac operating system. Please\n" +
-                        "report it to Apple. There is nothing we can do about this.");
-        responseMap.put("expensive", 
-                        "The cost of our product is quite competitive. Have you looked around\n" +
-                        "and really compared our features?");
-        responseMap.put("installation", 
-                        "The installation is really quite straight forward. We have tons of\n" +
-                        "wizards that do all the work for you. Have you read the installation\n" +
-                        "instructions?");
-        responseMap.put("memory", 
-                        "If you read the system requirements carefully, you will see that the\n" +
-                        "specified memory requirements are 1.5 giga byte. You really should\n" +
-                        "upgrade your memory. Anything else you want to know?");
-        responseMap.put("linux", 
-                        "We take Linux support very seriously. But there are some problems.\n" +
-                        "Most have to do with incompatible glibc versions. Can you be a bit\n" +
-                        "more precise?");
-        responseMap.put("bluej", 
-                        "Ahhh, BlueJ, yes. We tried to buy out those guys long ago, but\n" +
-                        "they simply won't sell... Stubborn people they are. Nothing we can\n" +
-                        "do about it, I'm afraid.");
+        Charset charset = Charset.forName("US-ASCII");
+        String filename = "response_map.txt";
+        Path path = Paths.get(filename);
+        boolean exitLoop = false;
+        
+        try {
+            BufferedReader readerFile = Files.newBufferedReader(path, charset);
+        
+            do {
+                // grab the key(s)
+                String keyLine = readerFile.readLine();
+                
+                // end-of-file reached? done with map
+                if (keyLine == null) {
+                    exitLoop = true;
+                    break;
+                }
+                // clear whitespace, convert to lowercase
+                keyLine = keyLine.trim().toLowerCase();
+                
+                // empty line reached? done with map
+                if (keyLine.isEmpty()) {                    
+                    exitLoop = true;
+                    break;
+                }
+
+                String value = "";   
+                boolean exitInnerLoop = false;
+                // grab a (potential) multi-line entry, combine until blank line
+                do {
+                    String newLine = readerFile.readLine();
+                    // end-of-file reached? done grabbing value
+                    if (newLine == null) {
+                        exitInnerLoop = true;
+                        break;
+                    }
+                    // clear whitespace
+                    newLine = newLine.trim();
+                    
+                    // empty line reached? done grabbing value
+                    if (newLine.isEmpty()) {                    
+                        exitInnerLoop = true;
+                        break;
+                    }
+                    
+                    // add a newline between lines
+                    if (!value.isEmpty())
+                        value += "\n";
+
+                    // and combine new line
+                    value += newLine;
+                    
+                } while (!exitInnerLoop);
+                
+                // Check that we actually got a value. If not, break
+                if (value.isEmpty()) {
+                    exitLoop = true;
+                    break;
+                }
+                
+                // Now we have key(s)/value pair
+                
+                // Split the keys and add them to the map with the value
+                String[] keyArray = keyLine.split(",");  // split at commas
+                // we trim() again because of whitespace between comma-separated keys
+                for(String key : keyArray) {
+                    responseMap.put(key.trim(), value);
+                }
+            } while (!exitLoop);
+        }
+        catch(IOException e) {
+            System.out.println("fillResponseMap: Error reading " + filename);
+            throw e;
+        }
+
     }
 
     /**

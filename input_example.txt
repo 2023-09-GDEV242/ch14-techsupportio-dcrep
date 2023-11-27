@@ -1,8 +1,25 @@
-This would be an entry
+I have an issue with the software crashing.
 
-This would become a
-multiline entry
-because it hasn't reached an empty
-line yet
+The software continually
+crashes!
 
-and this would be a new entry
+My O/S is
+Windows
+
+It runs incredibly slow
+
+I wish the performance was better.
+
+This seems very buggy.
+
+The product is very expensive
+
+I don't understand how to install the
+software
+
+It keeps giving me out of memory errors!
+
+bluej
+is
+pretty
+neat

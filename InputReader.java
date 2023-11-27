@@ -39,32 +39,10 @@ public class InputReader
             readerFile = Files.newBufferedReader(path, charset);
         }
         catch(IOException e) {
-            System.out.println("Unable to open " + filename);
+            System.out.println("InputReader(): Unable to open " + filename);
             throw e;
         }
     }
-
-    /**
-     * Read a line of text from standard input (the text terminal),
-     * and return it as a set of words.
-     *
-     * @return  A set of Strings, where each String is one of the 
-     *          words typed by the user
-     */
-    /*public HashSet<String> getInputConsole() 
-    {
-        System.out.print("> ");                // print prompt
-        String inputLine = readerConsole.nextLine().trim().toLowerCase();
-
-        String[] wordArray = inputLine.split(" ");  // split at spaces
-
-        // add words from array into hashset 
-        HashSet<String> words = new HashSet<>();
-        for(String word : wordArray) {
-            words.add(word);
-        }
-        return words;
-    }*/
     
     /**
      * Read a line of text from the text file and return it as a set of words.
@@ -102,14 +80,18 @@ public class InputReader
             } while (!exitLoop);
         }
         catch (IOException e) {
-            System.out.println("Unexpected error reading file " + filename);
+            System.out.println("getInput: Unexpected error reading file " + filename);
         }
+        
         // Nothing to return
         if (inputText.isEmpty())
             return null;
-            
+
         // Show input
         System.out.println(">" + inputText);
+        
+        // Strip punctuation to avoid them being included with "words"
+        inputText = inputText.replaceAll("\\p{Punct}", "");
             
         // Make the hashset
         String[] wordArray = inputText.split(" ");  // split at spaces
