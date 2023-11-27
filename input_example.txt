@@ -1,0 +1,8 @@
+This would be an entry
+
+This would become a
+multiline entry
+because it hasn't reached an empty
+line yet
+
+and this would be a new entry
