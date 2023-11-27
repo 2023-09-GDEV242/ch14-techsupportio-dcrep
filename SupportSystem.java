@@ -1,18 +1,20 @@
 import java.util.HashSet;
+import java.io.IOException;
 
 /**
  * This class implements a technical support system.
  * It is the top level class in this project.
  * The support system communicates via text input/output
- * in the text terminal.
+ * from a text file.
  * 
  * This class uses an object of class InputReader to read input
- * from the user, and an object of class Responder to generate responses.
+ * from a file, and an object of class Responder to generate responses.
  * It contains a loop that repeatedly reads input and generates
- * output until the users wants to leave.
+ * output until the end of a file or the word "bye" is encountered.
  * 
- * @author David J. Barnes and Michael Kölling.
- * @version 2016.02.29
+ * @author Daniel Corritore
+ *         modified from David J. Barnes and Michael Kölling.
+ * @version 2023.11.26
  */
 public class SupportSystem
 {
@@ -21,8 +23,11 @@ public class SupportSystem
     
     /**
      * Creates a technical support system.
+     * 
+     * @throws IOException If there's an I/O error opening a file
      */
     public SupportSystem()
+    throws IOException
     {
         reader = new InputReader();
         responder = new Responder();
@@ -31,8 +36,11 @@ public class SupportSystem
     /**
      * Start the technical support system. This will print a welcome message and enter
      * into a dialog with the user, until the user ends the dialog.
+     * 
+     * @throws IOException If there's an I/O error reading file
      */
     public void start()
+    throws IOException
     {
         boolean finished = false;
 
@@ -40,8 +48,14 @@ public class SupportSystem
 
         while(!finished) {
             HashSet<String> input = reader.getInput();
-
-            if(input.contains("bye")) {
+            
+            // NOTE: short-circuiting doesn't work in Java. who knew? (following throws on null):
+            //if (input == null || input.contains("bye")) {
+                
+            if (input == null) {
+                finished = true;
+            }
+            else if (input.contains("bye")) {
                 finished = true;
             }
             else {
